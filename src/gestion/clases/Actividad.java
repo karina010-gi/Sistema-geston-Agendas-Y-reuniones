@@ -15,7 +15,7 @@ public abstract class Actividad {
                      LocalTime horaInicio, LocalTime horaFin,
                      Etiqueta etiqueta) {
 
-        this.id = id;
+        this.id = Id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.horaInicio = horaInicio;
