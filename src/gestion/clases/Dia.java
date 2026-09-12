@@ -1,5 +1,4 @@
 package gestion.clases;
-
 import gestion.excepciones.HorarioInvalidoException;
 import java.time.LocalDate;
 import java.util.ArrayList;
