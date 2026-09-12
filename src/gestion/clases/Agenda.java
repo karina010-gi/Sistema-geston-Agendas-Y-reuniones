@@ -1,7 +1,6 @@
 package gestion.clases;
 
 import gestion.excepciones.FechaDuplicadaException;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +10,7 @@ public class Agenda {
 
     private String nombre;
     private HashMap<LocalDate, Dia> dias;
-
+    
     public Agenda(String nombre) {
         this.nombre = nombre;
         this.dias = new HashMap<>();
