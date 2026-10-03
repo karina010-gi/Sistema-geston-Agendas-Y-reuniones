@@ -1,6 +1,6 @@
 # Sistema de Gestión de Agenda y Reuniones
 
-Proyecto desarrollado en **Java** para administrar una agenda mediante días, actividades, reuniones y eventos personales. El sistema permite trabajar tanto mediante **consola** como mediante una **interfaz gráfica desarrollada con Swing**.
+Proyecto desarrollado en **Java 8** para administrar una agenda mediante días, actividades, reuniones y eventos personales. El sistema puede utilizarse mediante **consola** o mediante una **interfaz gráfica desarrollada con Java Swing**.
 
 ## Integrantes
 
@@ -10,131 +10,239 @@ Proyecto desarrollado en **Java** para administrar una agenda mediante días, ac
 
 ## Descripción
 
-El proyecto busca facilitar la organización de actividades académicas, laborales y personales. La agenda permite registrar fechas y asociar distintas actividades a cada día, además de realizar operaciones de búsqueda, modificación, eliminación y filtrado.
+El sistema permite organizar actividades académicas, laborales y personales asociándolas a fechas determinadas. Una agenda contiene días y cada día mantiene sus actividades.
 
-La estructura principal utiliza un `HashMap<LocalDate, Dia>` para almacenar los días de la agenda. Cada objeto `Dia` contiene, a su vez, un `ArrayList<Actividad>`, formando una segunda colección anidada.
+La estructura principal de datos es:
+
+```text
+Agenda
+└── HashMap<LocalDate, Dia>
+    └── Dia
+        └── ArrayList<Actividad>
+```
+
+La agenda utiliza la fecha como clave del `HashMap`, mientras que cada `Dia` mantiene una colección de actividades.
+
+El modelo de actividades utiliza una clase abstracta `Actividad`, de la cual heredan:
+
+- `Reunion`
+- `EventoPersonal`
+
+Además, las actividades pueden asociarse a una `Etiqueta` y las reuniones pueden contener múltiples `Participante`.
 
 ## Funcionalidades implementadas
 
 El sistema permite:
 
-- Agregar, listar, modificar, eliminar y buscar días.
-- Agregar actividades a un día determinado.
-- Registrar reuniones y eventos personales.
-- Listar las actividades correspondientes a una fecha.
-- Modificar y eliminar actividades existentes.
-- Buscar actividades por identificador o título.
-- Clasificar actividades mediante etiquetas.
-- Registrar participantes asociados a reuniones.
-- Consultar actividades utilizando criterios de período y etiqueta.
-- Validar fechas duplicadas.
-- Validar conflictos o solapamientos de horario.
-- Utilizar el sistema mediante consola o interfaz gráfica.
+### Gestión de días
 
-## Ingreso de datos
+- Agregar días.
+- Listar días registrados.
+- Modificar la fecha de un día.
+- Eliminar días.
+- Buscar días por fecha.
 
-**Importante:** en la versión actual del proyecto **no se encuentra implementada la carga automática de datos mediante archivos CSV**.
+### Gestión de actividades
 
-Por este motivo, los datos deben ser ingresados **manualmente durante la ejecución del programa**, utilizando las opciones disponibles en la consola o en la interfaz gráfica.
+- Agregar actividades a un día.
+- Listar las actividades de un día.
+- Modificar actividades.
+- Eliminar actividades por identificador.
+- Buscar actividades por identificador.
+- Buscar actividades por título.
+- Registrar reuniones.
+- Registrar eventos personales.
+- Asociar etiquetas a las actividades.
+- Asociar participantes a las reuniones.
 
-Al iniciar una nueva ejecución, la agenda comienza sin datos cargados previamente. Para utilizar las distintas funcionalidades se recomienda seguir este orden:
+### Consultas
 
-1. Registrar uno o más días.
-2. Agregar actividades, reuniones o eventos personales a los días registrados.
-3. Utilizar posteriormente las opciones de listado, búsqueda, modificación, eliminación y consulta.
+- Buscar actividades correspondientes a una fecha.
+- Buscar actividades dentro de un período de fechas.
+- Filtrar actividades por etiqueta.
+- Consultar actividades por período y etiqueta.
+- Ordenar los resultados de la consulta por fecha y hora de inicio.
 
-La carga y persistencia mediante CSV quedó planteada como una funcionalidad del diseño del proyecto, pero **no forma parte de la implementación entregada**.
+La consulta por período y etiqueta utiliza la clase `ActividadProgramada`, que permite mantener asociadas la fecha y la actividad encontrada.
 
-## Estructura principal del proyecto
+## Sobrecarga y sobrescritura
+
+El proyecto implementa sobrecarga de métodos en las clases del dominio.
+
+### `Agenda`
+
+```java
+buscarActividades(LocalDate fecha)
+buscarActividades(LocalDate inicio, LocalDate fin)
+```
+
+### `Dia`
+
+```java
+buscarActividad(int id)
+buscarActividad(String titulo)
+```
+
+También se utiliza sobrescritura mediante `mostrarDetalle()`:
 
 ```text
-src/
-└── gestion/
-    ├── clases/
-    │   ├── Actividad.java
-    │   ├── Agenda.java
-    │   ├── Dia.java
-    │   ├── Etiqueta.java
-    │   ├── EventoPersonal.java
-    │   ├── Participante.java
-    │   └── Reunion.java
-    │
-    ├── consola/
-    │   └── ConsolaUI.java
-    │
-    ├── excepciones/
-    │   ├── FechaDuplicadaException.java
-    │   └── HorarioInvalidoException.java
-    │
-    ├── gui/
-    │   ├── AgregarActividad.java
-    │   ├── AgregarDia.java
-    │   ├── BuscarActividad.java
-    │   ├── ConsultarAgenda.java
-    │   ├── EliminarActividad.java
-    │   ├── EliminarDia.java
-    │   ├── ListarActividades.java
-    │   ├── ListarDias.java
-    │   ├── MenuPrincipal.java
-    │   ├── ModificarActividad.java
-    │   └── ModificarDia.java
-    │
-    └── main/
-        └── Main.java
+Actividad <<abstract>>
+       ▲
+       │
+ ┌─────┴──────────────┐
+Reunion        EventoPersonal
 ```
+
+Tanto `Reunion` como `EventoPersonal` implementan su propia versión de `mostrarDetalle()`.
 
 ## Modelo de clases
 
 Las principales clases del dominio son:
 
-- **Agenda:** administra los días registrados y las búsquedas generales.
-- **Dia:** representa una fecha y contiene las actividades correspondientes.
-- **Actividad:** clase abstracta que reúne los atributos comunes de las actividades.
-- **Reunion:** especialización de `Actividad`, con lugar y participantes.
-- **EventoPersonal:** especialización de `Actividad` para compromisos personales.
-- **Etiqueta:** permite clasificar las actividades.
-- **Participante:** representa a una persona asociada a una reunión.
+| Clase | Responsabilidad |
+|---|---|
+| `Agenda` | Administra los días y realiza búsquedas y consultas generales. |
+| `Dia` | Representa una fecha y contiene las actividades de ese día. |
+| `Actividad` | Clase abstracta que contiene los atributos comunes de las actividades. |
+| `Reunion` | Especialización de `Actividad` que incorpora lugar y participantes. |
+| `EventoPersonal` | Especialización de `Actividad` para eventos personales. |
+| `Etiqueta` | Permite clasificar las actividades. |
+| `Participante` | Representa una persona asociada a una reunión. |
+| `ActividadProgramada` | Relaciona una actividad con la fecha en que fue encontrada en una consulta. |
 
-La relación principal entre las colecciones es:
+### Atributos principales
+
+`Actividad` contiene:
 
 ```text
-Agenda
-  └── HashMap<LocalDate, Dia>
-          └── Dia
-               └── ArrayList<Actividad>
+id : int
+titulo : String
+descripcion : String
+horaInicio : LocalTime
+horaFin : LocalTime
+etiqueta : Etiqueta
 ```
 
-## Excepciones propias
+`Reunion` agrega:
 
-El proyecto utiliza excepciones personalizadas para controlar situaciones propias del sistema:
+```text
+lugar : String
+participantes : ArrayList<Participante>
+```
 
-- `FechaDuplicadaException`: se genera al intentar registrar una fecha que ya existe.
-- `HorarioInvalidoException`: se utiliza para impedir actividades con conflictos o solapamientos de horario.
+`EventoPersonal` no posee atributos propios y utiliza los atributos heredados de `Actividad`.
 
-Estas excepciones son manejadas mediante `try-catch` para evitar que el programa finalice inesperadamente.
+`ActividadProgramada` contiene:
 
-## Ejecución
+```text
+fecha : LocalDate
+actividad : Actividad
+```
 
-El proyecto fue desarrollado como un proyecto Java/NetBeans y utiliza **Java 8**.
+## Excepciones personalizadas
 
-La clase de inicio utilizada por el código es:
+El proyecto utiliza dos excepciones propias:
+
+### `FechaDuplicadaException`
+
+Se utiliza cuando se intenta agregar un día cuya fecha ya está registrada o modificar un día utilizando una fecha que ya existe.
+
+### `HorarioInvalidoException`
+
+Se utiliza para impedir actividades con horarios inválidos, incluyendo conflictos o solapamientos de horario dentro de un mismo día.
+
+Las excepciones son manejadas mediante `try-catch` en las operaciones correspondientes.
+
+## Persistencia de datos
+
+La persistencia **sí está implementada** en la versión actual del proyecto.
+
+La clase:
+
+```text
+gestion.persistencia.PersistenciaCSV
+```
+
+administra dos archivos:
+
+```text
+datos/
+├── dias.csv
+└── actividades.csv
+```
+
+### `dias.csv`
+
+Almacena las fechas de los días registrados.
+
+### `actividades.csv`
+
+Almacena información de las actividades, incluyendo:
+
+```text
+fecha
+id
+tipo
+titulo
+descripcion
+horaInicio
+horaFin
+etiqueta
+lugar
+participantes
+```
+
+La persistencia permite:
+
+- Comprobar si existen los archivos CSV.
+- Cargar los datos al iniciar.
+- Guardar los días.
+- Guardar las actividades.
+- Reconstruir reuniones y sus participantes.
+- Reconstruir eventos personales.
+- Crear nuevamente las etiquetas asociadas.
+
+## Datos iniciales
+
+La clase:
+
+```text
+gestion.datos.DatosIniciales
+```
+
+proporciona datos iniciales para ejecutar el sistema cuando no existen los archivos CSV o cuando ocurre un problema durante la carga.
+
+Por lo tanto, el sistema puede ejecutarse tanto con datos persistidos como con datos iniciales generados por `DatosIniciales`.
+
+## Ejecución del programa
+
+La clase principal es:
 
 ```text
 gestion.main.Main
 ```
 
-Al ejecutar `Main`, el programa solicita seleccionar uno de los dos modos disponibles:
+Al iniciar el programa:
+
+1. Se crea una instancia de `Agenda`.
+2. Se comprueba si existen `dias.csv` y `actividades.csv`.
+3. Si existen, se cargan mediante `PersistenciaCSV`.
+4. Si no existen, se cargan datos iniciales mediante `DatosIniciales`.
+5. El usuario selecciona el modo de uso:
+   - Consola.
+   - Interfaz gráfica.
+6. Al finalizar el modo consola, los datos se guardan en CSV.
+7. Desde la interfaz gráfica también existe la opción de guardar y salir.
+
+## Modo consola
+
+La consola ofrece el siguiente menú:
 
 ```text
-1. Consola
-2. Interfaz gráfica
-```
+======================================
+     SISTEMA DE GESTIÓN DE AGENDA
+======================================
 
-### Modo consola
-
-El menú principal contiene las siguientes opciones:
-
-```text
 === GESTIÓN DE DÍAS ===
 1. Agregar día
 2. Listar días
@@ -154,18 +262,119 @@ El menú principal contiene las siguientes opciones:
 12. Salir
 ```
 
-### Interfaz gráfica
+La búsqueda de actividades permite seleccionar:
 
-Al seleccionar la segunda opción se inicia la interfaz gráfica Swing, desde la cual se puede acceder a las operaciones de gestión de la agenda mediante ventanas.
+```text
+1. ID
+2. Título
+```
 
-## Consideraciones
+Las fechas ingresadas por consola utilizan el formato:
 
-- Las fechas ingresadas desde consola utilizan el formato `dd/MM/yyyy`.
-- Para agregar una actividad primero debe existir el día correspondiente.
-- Los datos permanecen en memoria solamente durante la ejecución actual.
-- Cerrar el programa elimina los datos ingresados durante esa ejecución.
-- No se requiere ningún archivo CSV para ejecutar esta versión.
-- La persistencia y carga automática desde CSV no están implementadas en la entrega actual.
+```text
+dd/MM/yyyy
+```
+
+## Interfaz gráfica
+
+La interfaz gráfica está desarrollada con **Java Swing**.
+
+El menú principal permite acceder a las operaciones de gestión de días, actividades y consultas.
+
+Las ventanas implementadas son:
+
+### Gestión de días
+
+- `AgregarDia`
+- `ListarDias`
+- `ModificarDia`
+- `EliminarDia`
+- `BuscarDia`
+
+### Gestión de actividades
+
+- `AgregarActividad`
+- `ListarActividades`
+- `ModificarActividad`
+- `EliminarActividad`
+- `BuscarActividad`
+
+### Otras ventanas y utilidades
+
+- `MenuPrincipal`
+- `MenuDias`
+- `MenuActividades`
+- `ConsultarAgenda`
+- `EstiloUI`
+- `PanelConFondo`
+
+Las ventanas utilizan una instancia compartida de `Agenda` para realizar las operaciones sobre los datos.
+
+## Estructura actual del proyecto
+
+```text
+Proyecto Agenda/
+├── datos/
+│   ├── actividades.csv
+│   └── dias.csv
+│
+├── nbproject/
+│   └── configuración de NetBeans
+│
+├── src/
+│   └── gestion/
+│       │
+│       ├── clases/
+│       │   ├── Actividad.java
+│       │   ├── ActividadProgramada.java
+│       │   ├── Agenda.java
+│       │   ├── Dia.java
+│       │   ├── Etiqueta.java
+│       │   ├── EventoPersonal.java
+│       │   ├── Participante.java
+│       │   └── Reunion.java
+│       │
+│       ├── consola/
+│       │   └── ConsolaUI.java
+│       │
+│       ├── datos/
+│       │   └── DatosIniciales.java
+│       │
+│       ├── excepciones/
+│       │   ├── FechaDuplicadaException.java
+│       │   └── HorarioInvalidoException.java
+│       │
+│       ├── gui/
+│       │   ├── AgregarActividad.java
+│       │   ├── AgregarDia.java
+│       │   ├── BuscarActividad.java
+│       │   ├── BuscarDia.java
+│       │   ├── ConsultarAgenda.java
+│       │   ├── EliminarActividad.java
+│       │   ├── EliminarDia.java
+│       │   ├── EstiloUI.java
+│       │   ├── ListarActividades.java
+│       │   ├── ListarDias.java
+│       │   ├── MenuActividades.java
+│       │   ├── MenuDias.java
+│       │   ├── MenuPrincipal.java
+│       │   ├── ModificarActividad.java
+│       │   ├── ModificarDia.java
+│       │   └── PanelConFondo.java
+│       │
+│       ├── main/
+│       │   └── Main.java
+│       │
+│       ├── persistencia/
+│       │   └── PersistenciaCSV.java
+│       │
+│       └── recursos/
+│           ├── chiikawa.png
+│           └── fondo_polka.jpg
+│
+├── build.xml
+└── manifest.mf
+```
 
 ## Tecnologías utilizadas
 
@@ -173,13 +382,97 @@ Al seleccionar la segunda opción se inicia la interfaz gráfica Swing, desde la
 - Java Collections Framework
 - `HashMap`
 - `ArrayList`
+- `LocalDate`
+- `LocalTime`
 - Java Swing
-- NetBeans / Apache Ant
+- NetBeans
+- Apache Ant
 - Programación orientada a objetos
-- Herencia y polimorfismo
-- Sobrecarga y sobreescritura de métodos
+- Herencia
+- Polimorfismo
+- Sobrecarga de métodos
+- Sobrescritura de métodos
 - Excepciones personalizadas
+- Persistencia mediante archivos CSV
 
-## Estado del proyecto
+## Requisitos
 
-El sistema implementa la gestión manual de la agenda y sus principales operaciones mediante consola e interfaz gráfica. La funcionalidad de persistencia mediante CSV fue considerada en el diseño inicial, pero quedó pendiente de implementación, por lo que la versión entregada trabaja exclusivamente con datos ingresados manualmente durante cada ejecución.
+Para ejecutar el proyecto se requiere:
+
+- Java 8 o compatible.
+- NetBeans si se desea abrir y ejecutar como proyecto NetBeans.
+
+El proyecto está configurado para utilizar:
+
+```text
+Main class: gestion.main.Main
+Java source: 1.8
+Java target: 1.8
+```
+
+## Flujo general del sistema
+
+```text
+                         ┌──────────────────┐
+                         │      Main        │
+                         └────────┬─────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+              Cargar datos                 Datos iniciales
+                    │                           │
+                    └─────────────┬─────────────┘
+                                  │
+                              ┌───▼───┐
+                              │ Agenda│
+                              └───┬───┘
+                                  │
+                         HashMap<LocalDate, Dia>
+                                  │
+                              ┌───▼───┐
+                              │  Dia  │
+                              └───┬───┘
+                                  │
+                         ArrayList<Actividad>
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                Reunion                 EventoPersonal
+                    │
+              Participante
+                    │
+                Etiqueta
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                ConsolaUI                  Swing GUI
+                    │                           │
+                    └─────────────┬─────────────┘
+                                  │
+                           PersistenciaCSV
+                                  │
+                         ┌────────┴────────┐
+                         │                 │
+                     dias.csv       actividades.csv
+```
+
+## Estado actual del proyecto
+
+La versión actual implementa:
+
+- Gestión de días.
+- Gestión de actividades.
+- Reuniones y participantes.
+- Eventos personales.
+- Etiquetas.
+- Búsquedas y modificaciones.
+- Consultas por período y etiqueta.
+- Colecciones JCF con estructura anidada.
+- Sobrecarga y sobrescritura.
+- Excepciones personalizadas.
+- Interfaz de consola.
+- Interfaz gráfica Swing.
+- Carga y guardado mediante CSV.
+- Datos iniciales de respaldo.
+
+Los datos de la agenda pueden mantenerse entre ejecuciones mediante los archivos ubicados en la carpeta `datos`.
